@@ -1,4 +1,4 @@
-package com.charlesahunt.scalapb
+package com.nianticproject.gradle.scalapb
 
 import java.io.File
 import java.nio.file.Paths

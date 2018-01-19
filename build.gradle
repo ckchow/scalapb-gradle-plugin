@@ -8,7 +8,8 @@ plugins {
     id 'maven-publish'
 }
 
-group 'com.charlesahunt'
+// mostly copied from com.charlesahunt.scalapb-plugin + some additions
+group 'com.nianticproject.gradle'
 version = '1.1.5-SNAPSHOT'
 
 sourceCompatibility = 1.8
@@ -32,8 +33,6 @@ dependencies {
   compile 'com.typesafe.scala-logging:scala-logging_2.12:3.7.2'
   testCompile group: 'org.scalatest', name: 'scalatest_2.12', version: "3.0.1"
   testRuntime 'org.pegdown:pegdown:1.4.2'
-//    zinc 'com.typesafe.zinc:zinc:0.3.13'
-//    compile 'org.scala-sbt:zinc_2.12:1.1.0'
   compile 'com.google.protobuf:protobuf-java:3.4.0'
   compile 'com.trueaccord.scalapb:compilerplugin_2.12:0.6.7'
   compile 'com.trueaccord.scalapb:scalapb-runtime-grpc_2.12:0.6.7'
@@ -54,20 +53,20 @@ artifacts {
 gradlePlugin {
     plugins {
         scalapbPlugin {
-            id = 'com.charlesahunt.scalapb'
-            implementationClass = 'com.charlesahunt.scalapb.ScalaPBPlugin'
+            id = 'com.nianticproject.gradle.scalapb'
+            implementationClass = 'com.nianticproject.gradle.scalapb.ScalaPBPlugin'
         }
     }
 }
 
 pluginBundle {
-    website = 'https://github.com/CharlesAHunt/scalapb-gradle-plugin'
-    vcsUrl = 'git@github.com:CharlesAHunt/scalapb-gradle-plugin.git'
+    website = 'https://gitlab.nianticlabs.com/cchow/scalapb-gradle-plugin'
+    vcsUrl = 'git@gitlab.nianticlabs.com:cchow/scalapb-gradle-plugin.git'
     tags = ['scala', 'scalapb', 'proto', 'protobuf']
     
     plugins {
         scalapbPlugin {
-            id = 'com.charlesahunt.scalapb'
+            id = 'com.nianticproject.gradle.scalapb'
             displayName = 'Gradle ScalaPB Plugin'
             description = 'This plugin uses the [ScalaPB](http://scalapb.github.io) compiler to generate Scala case' +
                     ' classes from protocol buffers and put them under the managed sources directory in your project.'
@@ -77,12 +76,25 @@ pluginBundle {
 
 // Plugin publication
 publishing {
-    publications {
-        pluginPublication (MavenPublication) {
-            from        components.java
-            groupId     project.group
-            artifactId  project.name
-            version     project.version
-        }
+  publications {
+      pluginPublication (MavenPublication) {
+          from        components.java
+          groupId     project.group
+          artifactId  project.name
+          version     project.version
+      }
     }
+
+  repositories {
+    maven {
+      // By default we publish to the shared snapshot repository, but
+      // you can publish to your own private repo instead, like so:
+      // ./gradlew platform:publish -PmavenPublishPath=/nexus/content/repositories/mysnapshots
+      url "https://${mavenRepoHost}${mavenPublishPath}"
+      credentials {
+        username deployMavenUser
+        password deployMavenPassword
+      }
+    }
+  }
 }
