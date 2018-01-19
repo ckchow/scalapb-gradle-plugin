@@ -1,4 +1,4 @@
-package com.charlesahunt.scalapb;
+package com.nianticproject.gradle.scalapb;
 
 import java.util.ArrayList;
 import java.util.List;

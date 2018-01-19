@@ -1,4 +1,4 @@
-package com.charlesahunt.scalapb
+package com.nianticproject.gradle.scalapb
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
