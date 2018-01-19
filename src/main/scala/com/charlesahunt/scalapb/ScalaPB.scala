@@ -128,12 +128,12 @@ object ProtocPlugin extends LazyLogging {
 
     val absoluteSourceDir = new File(s"$projectRoot/$projectProtoSourceDir")
 
+    // grab all schemas
     val schemas = List(absoluteSourceDir).toSet[File].flatMap { srcDir =>
-      (PathFinder(srcDir) ** (GlobFilter("*.proto") /** -- toExclude**/)).get.map(_.getAbsoluteFile)
+      (PathFinder(srcDir) ** GlobFilter("*.proto")).get.map(_.getAbsoluteFile)
     }
-//    // Include Scala binary version like "_2.11" for cross building.
-//    val cacheFile = (streams in key).value.cacheDirectory / s"protobuf_${scalaBinaryVersion.value}"
-    val protocVersion = "-v330"
+
+    val protocVersion = "-v340"
     def protocCommand(arg: Seq[String]) = com.github.os72.protocjar.Protoc.runProtoc(protocVersion +: arg.toArray)
     def compileProto(): Set[File] =
       compile(
@@ -145,17 +145,9 @@ object ProtocPlugin extends LazyLogging {
         pythonExe = "python",
         deleteTargetDirectory = true
       )
-//    val cachedCompile = FileFunction.cached(
-//      cacheFile, inStyle = FilesInfo.lastModified, outStyle = FilesInfo.exists) { (in: Set[File]) =>
-//      compileProto()
-//    }
 
-//    if(PB.recompile.value) {
     logger.info("Running compileProto")
     compileProto()
-//    } else {
-//      cachedCompile(schemas).toSeq
-//    }
   }
 
   private[this] def unpack(deps: Seq[File], extractTarget: File): Seq[File] = {
