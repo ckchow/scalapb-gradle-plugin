@@ -5,11 +5,11 @@ import org.scalatest.WordSpec
 import protocbridge.Target
 
 class ScalaPBTest extends WordSpec {
-
+  // this just tests protoc, but that's fine for now
   "Protoc" should {
     "compile Scala code from the given protos" in {
 
-      val protocVersion = "-v330"
+      val protocVersion = "-v340"
 
       def protocCommand(arg: Seq[String]) = com.github.os72.protocjar.Protoc.runProtoc(protocVersion +: arg.toArray)
 
