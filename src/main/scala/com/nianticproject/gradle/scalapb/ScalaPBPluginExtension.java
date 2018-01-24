@@ -1,13 +1,18 @@
 package com.nianticproject.gradle.scalapb;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ScalaPBPluginExtension {
 
     List<String> dependentProtoSources;
     String targetDir;
-    String projectProtoSourceDir;
+    // supposed to be a set, but list is specific enough
+    List<String> projectProtoSourceDirs;
     String extractedIncludeDir;
 
     List<String> getDependentProtoSources() {
@@ -18,8 +23,8 @@ public class ScalaPBPluginExtension {
         return targetDir;
     }
 
-    String getProjectProtoSourceDir() {
-        return projectProtoSourceDir;
+    List<String> getProjectProtoSourceDirs() {
+        return projectProtoSourceDirs;
     }
 
     String getExtractedIncludeDir() {
@@ -34,8 +39,8 @@ public class ScalaPBPluginExtension {
         this.targetDir = targetDir;
     }
 
-    void setProjectProtoSourceDir(String projectProtoSourceDir) {
-        this.projectProtoSourceDir = projectProtoSourceDir;
+    void setProjectProtoSourceDirs(List<String> projectProtoSourceDirs) {
+        this.projectProtoSourceDirs = projectProtoSourceDirs;
     }
 
     void setExtractedIncludeDir(String extractedIncludeDir) {
@@ -45,7 +50,7 @@ public class ScalaPBPluginExtension {
     public ScalaPBPluginExtension() {
         this.dependentProtoSources = new ArrayList<String>();
         this.targetDir = "target/scala";
-        this.projectProtoSourceDir = "src/main/protobuf";
+        this.projectProtoSourceDirs = ImmutableList.of("src/main/protobuf");
         this.extractedIncludeDir = "target/external_protos";
     }
 

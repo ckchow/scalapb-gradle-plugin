@@ -29,11 +29,11 @@ dependencies {
   compile gradleApi()
   compile 'org.scala-lang:scala-library:2.12.4'
   compile 'org.scala-sbt:io_2.12:1.1.0'
-  compile 'com.github.os72:protoc-jar:3.4.0'
+  compile 'com.github.os72:protoc-jar:3.5.1'
   compile 'com.typesafe.scala-logging:scala-logging_2.12:3.7.2'
   testCompile group: 'org.scalatest', name: 'scalatest_2.12', version: "3.0.1"
   testRuntime 'org.pegdown:pegdown:1.4.2'
-  compile 'com.google.protobuf:protobuf-java:3.4.0'
+  compile 'com.google.protobuf:protobuf-java:3.5.1'
   compile 'com.trueaccord.scalapb:compilerplugin_2.12:0.6.7'
   compile 'com.trueaccord.scalapb:scalapb-runtime-grpc_2.12:0.6.7'
   compile 'com.trueaccord.scalapb:scalapb-runtime_2.12:0.6.7'

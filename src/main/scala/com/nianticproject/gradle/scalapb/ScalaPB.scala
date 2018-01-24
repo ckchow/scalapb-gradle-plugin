@@ -30,12 +30,12 @@ class ScalaPB extends DefaultTask with LazyLogging {
     val extractedIncludeDirs = getProject.getTasksByName("extractIncludeProto", true).asScala
         .flatMap(_.getOutputs.getFiles.asScala.map(_.getAbsoluteFile))
 
-    val projectProtoSourceDir = pluginExtensions.projectProtoSourceDir
+    val projectProtoSourceDir = pluginExtensions.projectProtoSourceDirs
 
     logger.info("Running scalapb compiler plugin for: " + getProject.getName)
     ProtocPlugin.sourceGeneratorTask(
       getProject.getProjectDir.getAbsolutePath,
-      projectProtoSourceDir,
+      projectProtoSourceDir.asScala.toSet,
       internalProtoSources ++ externalProtoSources ++ extractedIncludeDirs,
       pluginExtensions.extractedIncludeDir,
       targetDir)
@@ -118,30 +118,34 @@ object ProtocPlugin extends LazyLogging {
   }
 
   def sourceGeneratorTask(projectRoot: String,
-                          projectProtoSourceDir: String,
+                          projectProtoSourceDirs: Set[String],
                           protoIncludePaths: List[File],
                           extractedIncludeDir: String,
                           targetDir: String): Set[File] = {
     val unpackProtosTo = new File(projectRoot, extractedIncludeDir)
     val unpackedProtos = unpack(protoIncludePaths, unpackProtosTo)
-    logger.info("unpacked Protos:  " + unpackedProtos)
+    logger.info("unpacked Protos: " + unpackedProtos)
 
-    val absoluteSourceDir = new File(s"$projectRoot/$projectProtoSourceDir")
+    val absoluteSourceDirs = projectProtoSourceDirs.map { dir => new File(s"$projectRoot/$dir") }
 
     // grab all schemas
-    val schemas = List(absoluteSourceDir).toSet[File].flatMap { srcDir =>
+    val schemas = absoluteSourceDirs.flatMap { srcDir =>
       (PathFinder(srcDir) ** GlobFilter("*.proto")).get.map(_.getAbsoluteFile)
     }
 
-    val protocVersion = "-v340"
+    // filter files from sourcedirs to get includes
+    val includeDirs = absoluteSourceDirs.filterNot(_.isFile)
+
+    val protocVersion = "-v351"
     def protocCommand(arg: Seq[String]) = com.github.os72.protocjar.Protoc.runProtoc(protocVersion +: arg.toArray)
     def compileProto(): Set[File] =
       compile(
         protocCommand = protocCommand,
         schemas = schemas,
-        includePaths = Nil.+:(absoluteSourceDir).+:(unpackProtosTo),
+        includePaths = Nil ++ includeDirs :+ unpackProtosTo,
         protocOptions = Nil,
-        targets = Seq(Target(generatorAndOpts = scalapb.gen(), outputPath = new File(s"$projectRoot/$targetDir"))),
+        targets = Seq(Target(generatorAndOpts = scalapb.gen(javaConversions = true),
+          outputPath = new File(s"$projectRoot/$targetDir"))),
         pythonExe = "python",
         deleteTargetDirectory = true
       )
