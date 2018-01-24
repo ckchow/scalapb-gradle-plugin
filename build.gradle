@@ -53,7 +53,7 @@ artifacts {
 gradlePlugin {
     plugins {
         scalapbPlugin {
-            id = 'com.nianticproject.gradle.scalapb'
+            id = 'com.nianticproject.gradle.scalapb-plugin'
             implementationClass = 'com.nianticproject.gradle.scalapb.ScalaPBPlugin'
         }
     }
@@ -66,7 +66,7 @@ pluginBundle {
     
     plugins {
         scalapbPlugin {
-            id = 'com.nianticproject.gradle.scalapb'
+            id = 'com.nianticproject.gradle.scalapb-plugin'
             displayName = 'Gradle ScalaPB Plugin'
             description = 'This plugin uses the [ScalaPB](http://scalapb.github.io) compiler to generate Scala case' +
                     ' classes from protocol buffers and put them under the managed sources directory in your project.'
