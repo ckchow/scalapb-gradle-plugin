@@ -10,11 +10,10 @@ plugins {
 
 // mostly copied from com.charlesahunt.scalapb-plugin + some additions
 group 'com.nianticproject.gradle'
-version = '1.1.5-SNAPSHOT'
+version = '1.1.6-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
 
 repositories {
     jcenter()
