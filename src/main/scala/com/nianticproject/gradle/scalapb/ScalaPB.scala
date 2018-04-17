@@ -22,7 +22,7 @@ class ScalaPB extends DefaultTask with LazyLogging {
 
   @InputFiles
   def getSourceFiles: FileCollection = {
-    val projectProtoSourceDir = pluginExtensions.projectProtoSourceDir
+    val projectProtoSourceDir = pluginExtensions.projectProtoSourceDirs
     val projectRoot = getProject.getProjectDir.getAbsolutePath
     val absoluteSourceDir = new File(s"$projectRoot/$projectProtoSourceDir")
     val schemas = ProtocPlugin.collectProtoSources(absoluteSourceDir)
@@ -43,17 +43,19 @@ class ScalaPB extends DefaultTask with LazyLogging {
     val extractedIncludeDirs = getProject.getTasksByName("extractIncludeProto", true).asScala
         .flatMap(_.getOutputs.getFiles.asScala.map(_.getAbsoluteFile))
 
-    val projectProtoSourceDir = pluginExtensions.projectProtoSourceDir
+    val projectProtoSourceDirs = pluginExtensions.projectProtoSourceDirs
     val grpc = pluginExtensions.grpc
+    val javaConversions = pluginExtensions.javaConversions
 
     logger.info("Running scalapb compiler plugin for: " + getProject.getName)
     ProtocPlugin.sourceGeneratorTask(
       getProject.getProjectDir.getAbsolutePath,
-      projectProtoSourceDir,
+      projectProtoSourceDirs.asScala.toSet,
       internalProtoSources ++ externalProtoSources ++ extractedIncludeDirs,
       pluginExtensions.extractedIncludeDir,
       targetDir,
-      grpc
+      grpc = grpc,
+      javaConversions = javaConversions
     )
   }
 
@@ -141,18 +143,21 @@ object ProtocPlugin extends LazyLogging {
   }
 
   def sourceGeneratorTask(projectRoot: String,
-                          projectProtoSourceDir: String,
+                          projectProtoSourceDirs: Set[String],
                           protoIncludePaths: List[File],
                           extractedIncludeDir: String,
                           targetDir: String,
-                          grpc: Boolean): Set[File] = {
+                          grpc: Boolean,
+                          javaConversions: Boolean): Set[File] = {
     val unpackProtosTo = new File(projectRoot, extractedIncludeDir)
     val unpackedProtos = unpack(protoIncludePaths, unpackProtosTo)
     logger.info("unpacked Protos: " + unpackedProtos)
 
-    val absoluteSourceDir = new File(s"$projectRoot/$projectProtoSourceDir")
+    val absoluteSourceDirs = projectProtoSourceDirs.map { dir => new File(s"$projectRoot/$dir") }
 
-    val schemas = collectProtoSources(absoluteSourceDir)
+    val schemas = absoluteSourceDirs.flatMap(collectProtoSources)
+
+    val includeDirs = absoluteSourceDirs.filterNot(_.isFile)
 
 //    // Include Scala binary version like "_2.11" for cross building.
 //    val cacheFile = (streams in key).value.cacheDirectory / s"protobuf_${scalaBinaryVersion.value}"
@@ -162,9 +167,10 @@ object ProtocPlugin extends LazyLogging {
       compile(
         protocCommand = protocCommand,
         schemas = schemas,
-        includePaths = Nil.+:(absoluteSourceDir).+:(unpackProtosTo),
+        includePaths = Nil ++ includeDirs :+ unpackProtosTo,
         protocOptions = Nil,
-        targets = Seq(Target(generatorAndOpts = scalapb.gen(grpc = grpc), outputPath = new File(s"$projectRoot/$targetDir"))),
+        targets = Seq(Target(generatorAndOpts = scalapb.gen(grpc = grpc, javaConversions = javaConversions),
+          outputPath = new File(s"$projectRoot/$targetDir"))),
         pythonExe = "python",
         deleteTargetDirectory = true
       )
