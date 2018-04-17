@@ -12,7 +12,7 @@ public class ScalaPBPluginExtension {
     List<String> dependentProtoSources;
     String targetDir;
     // supposed to be a set, but list is specific enough
-    List<String> projectProtoSourceDirs;
+    String projectProtoSourceDir;
     String extractedIncludeDir;
     Boolean grpc;
 
@@ -24,8 +24,8 @@ public class ScalaPBPluginExtension {
         return targetDir;
     }
 
-    List<String> getProjectProtoSourceDirs() {
-        return projectProtoSourceDirs;
+    String getProjectProtoSourceDir() {
+        return projectProtoSourceDir;
     }
 
     String getExtractedIncludeDir() {
@@ -42,8 +42,8 @@ public class ScalaPBPluginExtension {
         this.targetDir = targetDir;
     }
 
-    void setProjectProtoSourceDirs(List<String> projectProtoSourceDirs) {
-        this.projectProtoSourceDirs = projectProtoSourceDirs;
+    void setProjectProtoSourceDir(String projectProtoSourceDir) {
+        this.projectProtoSourceDir = projectProtoSourceDir;
     }
 
     void setExtractedIncludeDir(String extractedIncludeDir) {
@@ -55,7 +55,7 @@ public class ScalaPBPluginExtension {
     public ScalaPBPluginExtension() {
         this.dependentProtoSources = new ArrayList<String>();
         this.targetDir = "target/scala";
-        this.projectProtoSourceDirs = ImmutableList.of("src/main/protobuf");
+        this.projectProtoSourceDir = "src/main/protobuf";
         this.extractedIncludeDir = "target/external_protos";
         this.grpc = true;
     }
