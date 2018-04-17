@@ -181,6 +181,7 @@ object ProtocPlugin extends LazyLogging {
 
   private[this] def unpack(deps: Seq[File], extractTarget: File): Seq[File] = {
     IO.createDirectory(extractTarget)
+    logger.info(s"unpacking deps: $deps")
     deps.flatMap { dep =>
       val seq = {
         val path = dep.getPath
@@ -190,7 +191,17 @@ object ProtocPlugin extends LazyLogging {
           IO.unzip(dep, extractTarget, "*.proto").toSeq
         }
         else if (path.endsWith(".proto")) {
-          val targetName = Paths.get(extractTarget.getAbsolutePath, dep.getName).toFile
+          val proposedName = Paths.get(extractTarget.getAbsolutePath, dep.getName).toFile
+          val targetName = if (proposedName.exists()) {
+            val tokens = proposedName.toString.split("\\.(?=[^\\.]+$)")
+            val result = Stream.from(1).map(i => Paths.get(tokens.head + s"_$i", tokens(1)))
+                .find(!_.toFile.exists()).get.toFile
+            logger.info(s"name collision: $proposedName -> $result")
+            result
+          } else {
+            proposedName
+          }
+
           IO.copy(Seq((dep, targetName)))
         }
         else if (dep.isDirectory) {
